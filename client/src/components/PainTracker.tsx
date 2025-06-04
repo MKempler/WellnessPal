@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Plus, TrendingUp, Activity } from "lucide-react";
+import { Heart, Plus, TrendingUp, Activity, Zap, Star, Sun, Coffee, Flower } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { auth } from "@/lib/firebase";
 import type { PainLog, Intervention } from "@shared/schema";
