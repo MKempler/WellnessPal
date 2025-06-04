@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, type User } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, type User } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -9,17 +9,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Debug logging to check configuration
-console.log('Firebase Config:', {
-  apiKey: firebaseConfig.apiKey ? 'Set' : 'Missing',
-  authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId ? 'Set' : 'Missing',
-  appId: firebaseConfig.appId ? 'Set' : 'Missing'
-});
 
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.appId) {
-  console.error('Firebase configuration is incomplete. Please check your environment variables.');
-}
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -31,6 +21,8 @@ export const signIn = (email: string, password: string) => {
 export const signUp = (email: string, password: string) => {
   return createUserWithEmailAndPassword(auth, email, password);
 };
+
+export { updateProfile };
 
 export const logOut = () => {
   return signOut(auth);

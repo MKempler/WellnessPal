@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { signIn, signUp } from "@/lib/firebase";
+import { signIn, signUp, updateProfile } from "@/lib/firebase";
 import { Heart } from "lucide-react";
 
 export default function AuthPage() {
@@ -21,7 +21,7 @@ export default function AuthPage() {
         const userCredential = await signUp(email, password);
         // Update display name if provided
         if (name && userCredential.user) {
-          await userCredential.user.updateProfile({ displayName: name });
+          await updateProfile(userCredential.user, { displayName: name });
         }
         return userCredential;
       } else {
