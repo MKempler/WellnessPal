@@ -3,31 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
+  --background: 35 25% 97%; /* #FBF8F3 - Warm cream */
   --foreground: 20 14.3% 4.1%;
-  --muted: 60 4.8% 95.9%;
+  --muted: 35 15% 92%; /* #F0EBE3 - Soft beige */
   --muted-foreground: 25 5.3% 44.7%;
-  --popover: 0 0% 100%;
+  --popover: 35 25% 97%;
   --popover-foreground: 20 14.3% 4.1%;
   --card: 0 0% 100%;
   --card-foreground: 20 14.3% 4.1%;
-  --border: 20 5.9% 90%;
-  --input: 20 5.9% 90%;
-  --primary: 237 91% 70%; /* #6B73FF */
-  --primary-foreground: 210 11% 98%; /* #F8FAFF */
-  --secondary: 225 100% 85%; /* #9BB5FF */
+  --border: 35 20% 88%; /* #E8DFD6 - Warm border */
+  --input: 35 20% 88%;
+  --primary: 25 85% 65%; /* #E67E22 - Warm orange */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 45 90% 75%; /* #F39C12 - Golden yellow */
   --secondary-foreground: 24 9.8% 10%;
-  --accent: 351 100% 85%; /* #FFB5BA */
+  --accent: 355 85% 78%; /* #F1948A - Soft coral */
   --accent-foreground: 24 9.8% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
-  --ring: 20 14.3% 4.1%;
-  --radius: 0.5rem;
+  --ring: 25 85% 65%;
+  --radius: 1rem;
   
-  /* Custom wellness colors */
-  --wellness-surface: 225 50% 98%; /* #F8FAFF */
-  --wellness-muted: 214 15% 52%; /* #718096 */
-  --wellness-success: 141 69% 58%; /* #52D47A */
+  /* Wellness color palette */
+  --wellness-peach: 25 85% 85%; /* #F5B583 */
+  --wellness-mint: 150 60% 85%; /* #A8E6CF */
+  --wellness-lavender: 270 60% 85%; /* #D1A3FF */
+  --wellness-coral: 355 85% 78%; /* #F1948A */
+  --wellness-sage: 120 30% 75%; /* #B8C5A6 */
+  --wellness-cream: 45 50% 95%; /* #FDF9E9 */
 }
 
 .dark {
@@ -92,12 +95,24 @@
   }
 
   .card-hover:hover {
-    @apply transform -translate-y-1 shadow-lg;
-    box-shadow: 0 10px 25px rgba(107, 115, 255, 0.15);
+    @apply transform -translate-y-2 shadow-2xl;
+    box-shadow: 0 20px 40px rgba(230, 126, 34, 0.15);
   }
 
   .animate-bounce-gentle {
-    animation: bounce-gentle 2s infinite;
+    animation: bounce-gentle 3s infinite;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-gentle {
+    animation: pulse-gentle 2s ease-in-out infinite;
+  }
+
+  .animate-wiggle {
+    animation: wiggle 1s ease-in-out;
   }
 
   @keyframes bounce-gentle {
@@ -105,11 +120,55 @@
       transform: translateY(0); 
     }
     40% { 
-      transform: translateY(-10px); 
+      transform: translateY(-8px); 
     }
     60% { 
-      transform: translateY(-5px); 
+      transform: translateY(-4px); 
     }
+  }
+
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(0px); 
+    }
+    50% { 
+      transform: translateY(-10px); 
+    }
+  }
+
+  @keyframes pulse-gentle {
+    0%, 100% { 
+      transform: scale(1); 
+    }
+    50% { 
+      transform: scale(1.05); 
+    }
+  }
+
+  @keyframes wiggle {
+    0%, 7%, 14%, 21%, 28%, 35%, 42%, 49%, 56%, 63%, 70%, 77%, 84%, 91%, 98%, 100% {
+      transform: rotate(0deg);
+    }
+    3.5%, 10.5%, 24.5%, 31.5%, 45.5%, 52.5%, 66.5%, 73.5%, 87.5%, 94.5% {
+      transform: rotate(2deg);
+    }
+    17.5%, 38.5%, 59.5%, 80.5% {
+      transform: rotate(-2deg);
+    }
+  }
+
+  .mascot-shadow {
+    filter: drop-shadow(0 10px 20px rgba(230, 126, 34, 0.2));
+  }
+
+  .warm-glow {
+    box-shadow: 0 0 20px rgba(230, 126, 34, 0.3);
+  }
+
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
   }
 }
 

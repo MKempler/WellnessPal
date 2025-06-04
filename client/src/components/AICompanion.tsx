@@ -1,19 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Bot, Send, Mic, Sparkles, Calendar, Target, TrendingUp, Heart } from "lucide-react";
+import { Bot, Send, Mic, Sparkles, Calendar, Target, TrendingUp, Heart, Star, Zap, Coffee, Sun } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { sendChatMessage, getDailySummary, type ChatMessage } from "@/lib/openai";
 import { apiRequest } from "@/lib/queryClient";
 
 const suggestedTopics = [
-  { icon: Heart, title: "💪 Pain Management", subtitle: "Tips and strategies", prompt: "Can you help me with some pain management strategies?" },
-  { icon: Target, title: "🧘 Mindfulness", subtitle: "Stress relief techniques", prompt: "I'd like to learn some mindfulness techniques for stress relief." },
-  { icon: TrendingUp, title: "📊 Progress Review", subtitle: "Analyze your data", prompt: "Can you review my recent progress and give me insights?" },
-  { icon: Calendar, title: "🎯 Goal Setting", subtitle: "Plan your journey", prompt: "Help me set some wellness goals for the coming week." },
+  { icon: Heart, title: "Pain Relief", subtitle: "Gentle strategies", prompt: "Can you help me with some pain management strategies?", color: "from-red-300 to-pink-300" },
+  { icon: Coffee, title: "Mindfulness", subtitle: "Peaceful moments", prompt: "I'd like to learn some mindfulness techniques for stress relief.", color: "from-green-300 to-emerald-300" },
+  { icon: TrendingUp, title: "Progress Check", subtitle: "Your journey", prompt: "Can you review my recent progress and give me insights?", color: "from-blue-300 to-indigo-300" },
+  { icon: Star, title: "Goal Setting", subtitle: "Dream big", prompt: "Help me set some wellness goals for the coming week.", color: "from-purple-300 to-violet-300" },
 ];
 
 export default function AICompanion() {
@@ -31,7 +32,7 @@ export default function AICompanion() {
   const { data: dailySummary } = useQuery({
     queryKey: ["/api/summary/daily"],
     enabled: !!auth.currentUser,
-    refetchInterval: 60000 * 60, // Refetch every hour
+    refetchInterval: 60000 * 60,
   });
 
   const sendMessageMutation = useMutation({
@@ -40,13 +41,11 @@ export default function AICompanion() {
       
       setIsTyping(true);
       
-      // First save the user message
       await apiRequest("POST", "/api/chat", {
         content,
         isFromUser: true,
       });
 
-      // Then get AI response  
       const response = await apiRequest("POST", "/api/chat", {
         content,
         isFromUser: true,
@@ -91,162 +90,279 @@ export default function AICompanion() {
   }, [messages, isTyping]);
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Mascot & Welcome */}
-      <div className="bg-gradient-to-br from-primary/10 to-blue-100 rounded-2xl p-6 text-center border border-primary/20">
-        <div className="w-24 h-24 mx-auto mb-4 bg-primary/20 rounded-full flex items-center justify-center animate-bounce">
-          <Bot className="text-4xl text-primary h-12 w-12" />
-        </div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Meet Pal! 🤖</h2>
-        <p className="text-gray-600 text-sm">
-          Your personal wellness companion is here to listen, support, and help you on your journey.
-        </p>
-      </div>
+      <motion.div 
+        className="bg-gradient-to-br from-orange-100 to-amber-100 rounded-3xl p-8 text-center border-2 border-orange-200 shadow-xl relative overflow-hidden"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+      >
+        {/* Background decorations */}
+        <div className="absolute top-4 left-4 w-6 h-6 bg-gradient-to-br from-yellow-300 to-orange-300 rounded-full opacity-40 animate-pulse"></div>
+        <div className="absolute top-8 right-6 w-4 h-4 bg-gradient-to-br from-pink-300 to-red-300 rounded-full opacity-50 animate-bounce"></div>
+        <div className="absolute bottom-6 left-8 w-5 h-5 bg-gradient-to-br from-green-300 to-emerald-300 rounded-full opacity-40 animate-pulse" style={{animationDelay: '1s'}}></div>
+
+        {/* Cute Mascot */}
+        <motion.div 
+          className="relative mx-auto mb-6"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div className="w-32 h-32 mx-auto bg-gradient-to-br from-orange-300 to-amber-400 rounded-full flex items-center justify-center mascot-shadow animate-float relative">
+            {/* Mascot face */}
+            <div className="relative">
+              <Bot className="text-white h-16 w-16 animate-pulse-gentle" />
+              
+              {/* Eyes */}
+              <div className="absolute -top-1 left-3 flex space-x-2">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+              </div>
+              
+              {/* Sparkles around mascot */}
+              <Sparkles className="absolute -top-4 -right-4 h-4 w-4 text-yellow-400 animate-bounce" />
+              <Zap className="absolute -bottom-2 -left-4 h-3 w-3 text-blue-400 animate-pulse" />
+            </div>
+          </div>
+          
+          {/* Floating hearts */}
+          <motion.div
+            className="absolute -top-2 -right-2"
+            animate={{ y: [-5, -15, -5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Heart className="h-6 w-6 text-pink-400" />
+          </motion.div>
+        </motion.div>
+
+        <motion.h2 
+          className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mb-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          Meet Pal!
+        </motion.h2>
+        
+        <motion.p 
+          className="text-orange-700 text-base leading-relaxed font-medium"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
+          Your cheerful wellness companion is here to brighten your day, listen with care, and support you every step of the way!
+        </motion.p>
+      </motion.div>
 
       {/* Chat Interface */}
-      <Card className="shadow-sm border-gray-100 overflow-hidden">
-        {/* Chat Header */}
-        <div className="bg-gradient-to-r from-primary to-blue-500 text-white p-4 flex items-center">
-          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3">
-            <Bot className="text-white h-6 w-6" />
-          </div>
-          <div>
-            <div className="font-medium">Pal</div>
-            <div className="text-xs text-blue-100">Always here to help</div>
-          </div>
-          <div className="ml-auto">
-            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-          </div>
-        </div>
-
-        {/* Chat Messages */}
-        <div className="max-h-96 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 && (
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                <Bot className="text-primary h-4 w-4" />
-              </div>
-              <div className="bg-gray-50 rounded-2xl rounded-tl-sm p-3 max-w-xs">
-                <p className="text-gray-800 text-sm">
-                  Hi there! I'm Pal, your wellness companion. I'm here to help you track your pain and mood, and provide support along your wellness journey. How are you feeling today?
-                </p>
-              </div>
-            </div>
-          )}
-
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex items-start ${msg.isFromUser ? "justify-end" : ""}`}>
-              {!msg.isFromUser && (
-                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                  <Bot className="text-primary h-4 w-4" />
-                </div>
-              )}
-              <div className={`rounded-2xl p-3 max-w-xs ${
-                msg.isFromUser 
-                  ? "bg-primary text-white rounded-tr-sm" 
-                  : "bg-gray-50 rounded-tl-sm"
-              }`}>
-                <p className={`text-sm ${msg.isFromUser ? "text-white" : "text-gray-800"}`}>
-                  {msg.content}
-                </p>
-                <div className={`text-xs mt-1 ${
-                  msg.isFromUser ? "text-blue-100" : "text-gray-500"
-                }`}>
-                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* Typing Indicator */}
-          {isTyping && (
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                <Bot className="text-primary h-4 w-4" />
-              </div>
-              <div className="bg-gray-50 rounded-2xl rounded-tl-sm p-3">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Chat Input */}
-        <div className="p-4 border-t border-gray-100">
-          <div className="flex items-end space-x-3">
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-10 h-10 bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100"
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.6 }}
+      >
+        <Card className="shadow-2xl border-2 border-orange-200 overflow-hidden rounded-3xl">
+          {/* Chat Header */}
+          <div className="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 text-white p-6 flex items-center">
+            <motion.div 
+              className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4 animate-pulse-gentle"
+              whileHover={{ scale: 1.1, rotate: 10 }}
             >
-              <Mic className="h-4 w-4" />
-            </Button>
+              <Bot className="text-white h-7 w-7" />
+            </motion.div>
             <div className="flex-1">
-              <Textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
-                rows={1}
-                className="resize-none text-sm border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
+              <div className="font-bold text-lg">Pal</div>
+              <div className="text-sm text-orange-100 flex items-center">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                Ready to chat
+              </div>
             </div>
-            <Button
-              onClick={handleSendMessage}
-              disabled={!message.trim() || sendMessageMutation.isPending}
-              size="icon"
-              className="w-10 h-10 bg-primary text-white hover:bg-primary/90"
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
             >
-              <Send className="h-4 w-4" />
-            </Button>
+              <Sparkles className="h-6 w-6 text-yellow-200" />
+            </motion.div>
           </div>
-        </div>
-      </Card>
+
+          {/* Chat Messages */}
+          <div className="max-h-96 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-orange-25 to-amber-25">
+            <AnimatePresence>
+              {messages.length === 0 && (
+                <motion.div 
+                  className="flex items-start"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <motion.div 
+                    className="w-10 h-10 bg-gradient-to-br from-orange-300 to-amber-400 rounded-full flex items-center justify-center mr-4 flex-shrink-0 mascot-shadow"
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Bot className="text-white h-5 w-5" />
+                  </motion.div>
+                  <div className="bg-white rounded-3xl rounded-tl-lg p-4 max-w-xs shadow-lg border-2 border-orange-100">
+                    <p className="text-orange-800 text-sm font-medium leading-relaxed">
+                      Hi there! I'm Pal, your cheerful wellness companion! I'm here to brighten your day, listen to your concerns, and provide warm support on your wellness journey. How are you feeling today?
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {messages.map((msg) => (
+              <motion.div 
+                key={msg.id} 
+                className={`flex items-start ${msg.isFromUser ? "justify-end" : ""}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {!msg.isFromUser && (
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange-300 to-amber-400 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mascot-shadow">
+                    <Bot className="text-white h-4 w-4" />
+                  </div>
+                )}
+                <div className={`rounded-3xl p-4 max-w-xs shadow-lg ${
+                  msg.isFromUser 
+                    ? "bg-gradient-to-br from-orange-400 to-amber-400 text-white rounded-tr-lg border-2 border-orange-300" 
+                    : "bg-white rounded-tl-lg border-2 border-orange-100"
+                }`}>
+                  <p className={`text-sm font-medium ${msg.isFromUser ? "text-white" : "text-orange-800"}`}>
+                    {msg.content}
+                  </p>
+                  <div className={`text-xs mt-2 ${
+                    msg.isFromUser ? "text-orange-100" : "text-orange-500"
+                  }`}>
+                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+
+            {/* Typing Indicator */}
+            {isTyping && (
+              <motion.div 
+                className="flex items-start"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-300 to-amber-400 rounded-full flex items-center justify-center mr-3 flex-shrink-0 mascot-shadow">
+                  <Bot className="text-white h-4 w-4" />
+                </div>
+                <div className="bg-white rounded-3xl rounded-tl-lg p-4 shadow-lg border-2 border-orange-100">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Chat Input */}
+          <div className="p-6 border-t-2 border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
+            <div className="flex items-end space-x-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-500 border-2 border-blue-200 hover:from-blue-200 hover:to-indigo-200 rounded-2xl"
+              >
+                <Mic className="h-5 w-5" />
+              </Button>
+              <div className="flex-1">
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Share what's on your mind..."
+                  rows={1}
+                  className="resize-none text-sm border-2 border-orange-200 focus:ring-2 focus:ring-orange-300 focus:border-orange-300 rounded-2xl bg-white"
+                />
+              </div>
+              <Button
+                onClick={handleSendMessage}
+                disabled={!message.trim() || sendMessageMutation.isPending}
+                size="icon"
+                className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-400 text-white hover:from-orange-500 hover:to-amber-500 rounded-2xl shadow-lg"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
 
       {/* AI Suggestions */}
-      <Card className="shadow-sm border-gray-100 hover:shadow-md transition-shadow">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <Sparkles className="text-primary mr-3 h-5 w-5" />
-            Suggested Topics
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {suggestedTopics.map((topic, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="p-3 h-auto text-left hover:bg-primary/5 group border-gray-200"
-                onClick={() => handleSuggestedTopic(topic.prompt)}
-              >
-                <div>
-                  <div className="text-primary text-sm font-medium group-hover:text-primary">
-                    {topic.title}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">{topic.subtitle}</div>
-                </div>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 1.0, duration: 0.6 }}
+      >
+        <Card className="shadow-xl border-2 border-orange-200 rounded-3xl overflow-hidden">
+          <CardContent className="p-6">
+            <h3 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mb-6 flex items-center">
+              <Sparkles className="text-orange-400 mr-3 h-6 w-6 animate-pulse" />
+              Chat Starters
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              {suggestedTopics.map((topic, index) => {
+                const Icon = topic.icon;
+                return (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant="outline"
+                      className={`p-4 h-auto text-left hover:shadow-lg group border-2 border-orange-200 bg-gradient-to-br ${topic.color} hover:from-orange-100 hover:to-amber-100 rounded-2xl transition-all duration-300`}
+                      onClick={() => handleSuggestedTopic(topic.prompt)}
+                    >
+                      <div className="w-full">
+                        <div className="flex items-center mb-2">
+                          <Icon className="h-5 w-5 text-orange-600 mr-2" />
+                          <div className="text-orange-800 font-bold text-sm">
+                            {topic.title}
+                          </div>
+                        </div>
+                        <div className="text-xs text-orange-600 opacity-80">{topic.subtitle}</div>
+                      </div>
+                    </Button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Daily Summary */}
-      {dailySummary?.summary && (
-        <div className="bg-gradient-to-r from-green-50 to-primary/10 rounded-2xl p-6 border border-green-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-            <Calendar className="text-green-500 mr-3 h-5 w-5" />
-            Today's Summary
+      {dailySummary && (
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+          className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-3xl p-6 border-2 border-green-200 shadow-xl"
+        >
+          <h3 className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4 flex items-center">
+            <Sun className="text-green-500 mr-3 h-6 w-6 animate-pulse" />
+            Today's Wellness Summary
           </h3>
-          <div className="text-sm text-gray-700 leading-relaxed">
-            <p>{dailySummary.summary}</p>
+          <div className="text-base text-green-800 leading-relaxed font-medium">
+            <p>Keep up the great work tracking your wellness journey!</p>
           </div>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
