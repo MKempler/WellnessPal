@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Bot, Send, Mic, Sparkles, Calendar, Target, TrendingUp, Heart, Star, Zap, Coffee, Sun } from "lucide-react";
 import { auth } from "@/lib/firebase";
-import { sendChatMessage, getDailySummary, type ChatMessage } from "@/lib/openai";
+import type { ChatMessage } from "@/lib/openai";
 import { apiRequest } from "@/lib/queryClient";
 
 const suggestedTopics = [
@@ -20,7 +20,9 @@ const suggestedTopics = [
 export default function AICompanion() {
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,7 +31,7 @@ export default function AICompanion() {
     enabled: !!auth.currentUser,
   });
 
-  const { data: dailySummary } = useQuery({
+  const { data: dailySummary } = useQuery<{ summary: string }>({
     queryKey: ["/api/summary/daily"],
     enabled: !!auth.currentUser,
     refetchInterval: 60000 * 60,
@@ -41,11 +43,6 @@ export default function AICompanion() {
       
       setIsTyping(true);
       
-      await apiRequest("POST", "/api/chat", {
-        content,
-        isFromUser: true,
-      });
-
       const response = await apiRequest("POST", "/api/chat", {
         content,
         isFromUser: true,
@@ -85,9 +82,45 @@ export default function AICompanion() {
     }
   };
 
+  const handleMicClick = () => {
+    const rec = recognitionRef.current;
+    if (!rec) {
+      toast({ title: "Voice input not supported", variant: "destructive" });
+      return;
+    }
+    if (isListening) {
+      rec.stop();
+      setIsListening(false);
+    } else {
+      try {
+        rec.start();
+        setIsListening(true);
+      } catch {
+        // ignore errors when starting twice
+      }
+    }
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.onresult = (e: any) => {
+      const transcript = Array.from(e.results)
+        .map((r: any) => r[0].transcript)
+        .join(" ");
+      setMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
+    };
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+  }, []);
 
   return (
     <motion.div 
@@ -273,9 +306,10 @@ export default function AICompanion() {
           <div className="p-6 border-t-2 border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
             <div className="flex items-end space-x-4">
               <Button
+                onClick={handleMicClick}
                 variant="outline"
                 size="icon"
-                className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-500 border-2 border-blue-200 hover:from-blue-200 hover:to-indigo-200 rounded-2xl"
+                className={`w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-500 border-2 border-blue-200 rounded-2xl ${isListening ? "animate-pulse" : "hover:from-blue-200 hover:to-indigo-200"}`}
               >
                 <Mic className="h-5 w-5" />
               </Button>
@@ -359,7 +393,7 @@ export default function AICompanion() {
             Today's Wellness Summary
           </h3>
           <div className="text-base text-green-800 leading-relaxed font-medium">
-            <p>Keep up the great work tracking your wellness journey!</p>
+            <p>{dailySummary.summary}</p>
           </div>
         </motion.div>
       )}

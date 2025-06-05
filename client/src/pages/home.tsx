@@ -35,7 +35,21 @@ export default function HomePage() {
   };
 
   // Calculate stats
-  const currentStreak = 7; // TODO: Calculate actual streak
+  const calculateStreak = () => {
+    if (painLogs.length === 0) return 0;
+    const dates = new Set(
+      painLogs.map((log) => new Date(log.date).toDateString())
+    );
+    let streak = 0;
+    const day = new Date();
+    // iterate backwards from today
+    while (dates.has(day.toDateString())) {
+      streak += 1;
+      day.setDate(day.getDate() - 1);
+    }
+    return streak;
+  };
+  const currentStreak = calculateStreak();
   const avgPain = painLogs.length > 0 
     ? (painLogs.slice(0, 7).reduce((sum, log) => sum + log.painLevel, 0) / Math.min(painLogs.length, 7)).toFixed(1)
     : "0";

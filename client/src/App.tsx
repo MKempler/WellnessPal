@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AuthProvider, { useAuth } from "@/components/AuthProvider";
 import AuthPage from "@/pages/auth";
 import HomePage from "@/pages/home";
+import InterventionPage from "@/pages/intervention";
 import NotFound from "@/pages/not-found";
 
 function AppContent() {
@@ -31,6 +32,7 @@ function AppContent() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/interventions/:id" component={InterventionPage} />
       <Route component={NotFound} />
     </Switch>
   );

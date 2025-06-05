@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,9 +12,12 @@ import { auth } from "@/lib/firebase";
 import type { PainLog, Intervention } from "@shared/schema";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 
+const painTags = ["Headache", "Tension", "Fatigue", "Nausea", "Other"];
+
 export default function PainTracker() {
   const [selectedPain, setSelectedPain] = useState<number>(0);
   const [notes, setNotes] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -28,14 +32,16 @@ export default function PainTracker() {
   });
 
   const logPainMutation = useMutation({
-    mutationFn: async (data: { painLevel: number; notes?: string }) => {
+    mutationFn: async (data: { painLevel: number; notes?: string; tags: string[] }) => {
       if (!auth.currentUser) throw new Error("Not authenticated");
       return apiRequest("POST", "/api/pain-logs", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pain-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/summary/patterns"] });
       setSelectedPain(0);
       setNotes("");
+      setSelectedTags([]);
       toast({
         title: "Pain logged successfully",
         description: "Your pain entry has been recorded.",
@@ -57,6 +63,7 @@ export default function PainTracker() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/interventions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/summary/patterns"] });
       toast({
         title: "Intervention added",
         description: "New intervention has been added to your tracker.",
@@ -77,6 +84,7 @@ export default function PainTracker() {
     logPainMutation.mutate({
       painLevel: selectedPain,
       notes: notes.trim() || undefined,
+      tags: selectedTags,
     });
   };
 
@@ -124,11 +132,41 @@ export default function PainTracker() {
                 </Button>
               ))}
             </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
-              <span>No pain</span>
-              <span>Severe</span>
-            </div>
+          <div className="flex justify-between text-xs text-gray-500 mt-2">
+            <span>No pain</span>
+            <span>Severe</span>
           </div>
+        </div>
+
+        {/* Tags */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Tags (optional)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {painTags.map((tag) => (
+              <Button
+                key={tag}
+                variant="outline"
+                size="sm"
+                className={`rounded-full text-sm ${
+                  selectedTags.includes(tag)
+                    ? "bg-primary text-white border-primary"
+                    : "bg-gray-100 text-gray-700 hover:bg-primary hover:text-white"
+                }`}
+                onClick={() =>
+                  setSelectedTags((prev) =>
+                    prev.includes(tag)
+                      ? prev.filter((t) => t !== tag)
+                      : [...prev, tag]
+                  )
+                }
+              >
+                {tag}
+              </Button>
+            ))}
+          </div>
+        </div>
 
           {/* Notes */}
           <div className="mb-6">
@@ -178,7 +216,11 @@ export default function PainTracker() {
               </p>
             ) : (
               interventions.map((intervention) => (
-                <div key={intervention.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <Link
+                  key={intervention.id}
+                  href={`/interventions/${intervention.id}`}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100"
+                >
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
                     <div>
@@ -190,7 +232,7 @@ export default function PainTracker() {
                     <div className="text-sm font-medium text-gray-800">{intervention.currentStreak} days</div>
                     <div className="text-xs text-gray-500">streak</div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>
