@@ -48,7 +48,7 @@ export default function InterventionPage() {
 
   return (
     <motion.div
-      className="max-w-md mx-auto p-4 pb-24 space-y-6 bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen relative"
+
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
