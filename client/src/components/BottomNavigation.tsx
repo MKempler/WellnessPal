@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 interface BottomNavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  className?: string;
 }
 
-export default function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
+export default function BottomNavigation({ activeTab, onTabChange, className }: BottomNavigationProps) {
   const tabs = [
     { id: "pain", label: "Pain", icon: Heart },
     { id: "mood", label: "Mood", icon: Smile },
@@ -14,7 +15,7 @@ export default function BottomNavigation({ activeTab, onTabChange }: BottomNavig
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 p-4 z-50">
+    <nav className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 p-4 z-50 ${className || ''}`.trim()}>
       <div className="flex justify-around">
         {tabs.map((tab) => {
           const Icon = tab.icon;

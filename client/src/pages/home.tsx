@@ -10,6 +10,7 @@ import PainTracker from "@/components/PainTracker";
 import MoodTracker from "@/components/MoodTracker";
 import AICompanion from "@/components/AICompanion";
 import BottomNavigation from "@/components/BottomNavigation";
+import DesktopNavigation from "@/components/DesktopNavigation";
 import type { PainLog, MoodLog } from "@shared/schema";
 
 export default function HomePage() {
@@ -35,7 +36,21 @@ export default function HomePage() {
   };
 
   // Calculate stats
-  const currentStreak = 7; // TODO: Calculate actual streak
+  const calculateStreak = () => {
+    if (painLogs.length === 0) return 0;
+    const dates = new Set(
+      painLogs.map((log) => new Date(log.date).toDateString())
+    );
+    let streak = 0;
+    const day = new Date();
+    // iterate backwards from today
+    while (dates.has(day.toDateString())) {
+      streak += 1;
+      day.setDate(day.getDate() - 1);
+    }
+    return streak;
+  };
+  const currentStreak = calculateStreak();
   const avgPain = painLogs.length > 0 
     ? (painLogs.slice(0, 7).reduce((sum, log) => sum + log.painLevel, 0) / Math.min(painLogs.length, 7)).toFixed(1)
     : "0";
@@ -57,7 +72,9 @@ export default function HomePage() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen shadow-2xl relative overflow-hidden">
+    <div className="md:flex min-h-screen">
+      <DesktopNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="flex-1 mx-auto max-w-md md:max-w-3xl bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen shadow-2xl relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-orange-200 to-amber-200 rounded-full opacity-20 animate-float"></div>
@@ -169,7 +186,12 @@ export default function HomePage() {
       </motion.main>
 
       {/* Bottom Navigation */}
-      <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        className="md:hidden"
+      />
+      </div>
     </div>
   );
 }
