@@ -58,7 +58,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-blue-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
+      <Card className="w-full max-w-md md:max-w-lg shadow-xl">
         <CardHeader className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-primary/20 rounded-full flex items-center justify-center">
             <Heart className="h-8 w-8 text-primary" />

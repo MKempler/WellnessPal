@@ -74,7 +74,7 @@ export default function HomePage() {
   return (
     <div className="md:flex min-h-screen">
       <DesktopNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <div className="flex-1 mx-auto max-w-md md:max-w-3xl bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen shadow-2xl relative overflow-hidden">
+      <div className="flex-1 mx-auto max-w-md md:max-w-none md:mx-0 md:w-full bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen shadow-2xl md:shadow-none relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-orange-200 to-amber-200 rounded-full opacity-20 animate-float"></div>
