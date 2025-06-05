@@ -36,6 +36,11 @@ export default function MoodTracker() {
     enabled: !!auth.currentUser,
   });
 
+  const { data: patternSummary, isLoading: patternsLoading } = useQuery<{ insights: string }>({
+    queryKey: ["/api/summary/patterns"],
+    enabled: !!auth.currentUser && moodLogs.length >= 3,
+  });
+
   const logMoodMutation = useMutation({
     mutationFn: async (data: { 
       mood: number; 
@@ -49,6 +54,7 @@ export default function MoodTracker() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/mood-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/summary/patterns"] });
       setSelectedMood(0);
       setAnxietyLevel([3]);
       setSelectedTriggers([]);
@@ -279,21 +285,24 @@ export default function MoodTracker() {
             <p className="text-gray-600 text-sm">
               Keep logging your mood for a few more days to get personalized insights!
             </p>
+          ) : patternsLoading && !patternSummary ? (
+            <p className="text-gray-600 text-sm">Analyzing your recent entries...</p>
+          ) : patternSummary ? (
+            patternSummary.insights.split("\n").map((line, idx) => (
+              <div
+                key={idx}
+                className="flex items-start"
+              >
+                <div
+                  className={`w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0 ${
+                    idx % 2 ? "bg-blue-400" : "bg-pink-400"
+                  }`}
+                ></div>
+                <p className="text-gray-700 text-sm">{line.trim()}</p>
+              </div>
+            ))
           ) : (
-            <>
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-pink-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                <p className="text-gray-700 text-sm">
-                  You've been consistent with tracking - that's the first step to understanding your patterns!
-                </p>
-              </div>
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                <p className="text-gray-700 text-sm">
-                  Consider noting what specific activities or situations correlate with your mood changes.
-                </p>
-              </div>
-            </>
+            <p className="text-gray-600 text-sm">No significant patterns detected yet.</p>
           )}
         </div>
       </div>

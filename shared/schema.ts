@@ -14,6 +14,7 @@ export const painLogs = pgTable("pain_logs", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   painLevel: integer("pain_level").notNull(), // 1-10
+  tags: json("tags").$type<string[]>().default([]),
   notes: text("notes"),
   date: timestamp("date").defaultNow().notNull(),
 });
@@ -39,6 +40,15 @@ export const interventions = pgTable("interventions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const interventionLogs = pgTable("intervention_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  interventionId: integer("intervention_id").notNull(),
+  painLevel: integer("pain_level").notNull(),
+  notes: text("notes"),
+  date: timestamp("date").defaultNow().notNull(),
+});
+
 export const chatMessages = pgTable("chat_messages", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -56,8 +66,10 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertPainLogSchema = createInsertSchema(painLogs).pick({
   painLevel: true,
   notes: true,
+  tags: true,
 }).extend({
   painLevel: z.number().min(1).max(10),
+  tags: z.array(z.string()).default([]),
 });
 
 export const insertMoodLogSchema = createInsertSchema(moodLogs).pick({
@@ -78,6 +90,14 @@ export const insertInterventionSchema = createInsertSchema(interventions).pick({
   frequency: true,
 });
 
+export const insertInterventionLogSchema = createInsertSchema(interventionLogs).pick({
+  interventionId: true,
+  painLevel: true,
+  notes: true,
+}).extend({
+  painLevel: z.number().min(1).max(10),
+});
+
 export const insertChatMessageSchema = createInsertSchema(chatMessages).pick({
   content: true,
   isFromUser: true,
@@ -91,5 +111,7 @@ export type MoodLog = typeof moodLogs.$inferSelect;
 export type InsertMoodLog = z.infer<typeof insertMoodLogSchema>;
 export type Intervention = typeof interventions.$inferSelect;
 export type InsertIntervention = z.infer<typeof insertInterventionSchema>;
+export type InterventionLog = typeof interventionLogs.$inferSelect;
+export type InsertInterventionLog = z.infer<typeof insertInterventionLogSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;

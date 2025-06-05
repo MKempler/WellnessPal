@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertPainLogSchema, insertMoodLogSchema, insertInterventionSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertUserSchema, insertPainLogSchema, insertMoodLogSchema, insertInterventionSchema, insertInterventionLogSchema, insertChatMessageSchema } from "@shared/schema";
 import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -108,6 +108,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/interventions/:id/logs", requireAuth, async (req: any, res) => {
+    try {
+      const logs = await storage.getInterventionLogs(
+        req.user.id,
+        parseInt(req.params.id, 10)
+      );
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/interventions/:id/logs", requireAuth, async (req: any, res) => {
+    try {
+      const logData = insertInterventionLogSchema.parse({
+        ...req.body,
+        interventionId: parseInt(req.params.id, 10),
+      });
+      const log = await storage.createInterventionLog(req.user.id, logData);
+      res.json(log);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // Chat routes
   app.get("/api/chat/messages", requireAuth, async (req: any, res) => {
     try {
@@ -196,6 +221,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const summary = completion.choices[0]?.message?.content || "Keep up the great work tracking your wellness journey!";
 
       res.json({ summary });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/summary/patterns", requireAuth, async (req: any, res) => {
+    try {
+      const painLogs = await storage.getPainLogs(req.user.id, 30);
+      const moodLogs = await storage.getMoodLogs(req.user.id, 30);
+      const interventions = await storage.getInterventions(req.user.id);
+      const interventionLogs = await Promise.all(
+        interventions.map(async (i) => ({
+          id: i.id,
+          name: i.name,
+          logs: await storage.getInterventionLogs(req.user.id, i.id, 30),
+        }))
+      );
+
+      const patternPrompt = `Analyze the user's recent wellness data to find correlations between interventions, pain levels and mood. Provide a few short insights if any patterns stand out.
+
+Pain logs: ${JSON.stringify(
+        painLogs.map((p) => ({ level: p.painLevel, date: p.date, tags: p.tags }))
+      )}
+Mood logs: ${JSON.stringify(
+        moodLogs.map((m) => ({ mood: m.mood, anxiety: m.anxietyLevel, date: m.date }))
+      )}
+Intervention logs: ${JSON.stringify(
+        interventionLogs.map((i) => ({
+          name: i.name,
+          logs: i.logs.map((l) => ({ pain: l.painLevel, date: l.date })),
+        }))
+      )}`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: patternPrompt }],
+        max_tokens: 200,
+        temperature: 0.5,
+      });
+
+      const insights =
+        completion.choices[0]?.message?.content ||
+        "No significant patterns detected yet.";
+
+      res.json({ insights });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
